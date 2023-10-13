@@ -1,0 +1,3 @@
+# Plotting script for PaSiMap data
+## Intended for use with Jalview
+...
