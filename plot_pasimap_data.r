@@ -1,6 +1,7 @@
 ##
 # this script plots the PaSiMap coordinates exported from Jalview in a scatterplot
-# datapoints will be colored by angle
+# datapoints will be colored by angle.
+# it will output the plot into your project folder. By default the file will be called "PaSiMap.svg".
 #
 #  go through the script and change annotated lines to your needs
 #  afterwards, run the whole script by pressing <Alt + Ctrl + r>
@@ -28,7 +29,7 @@ data$Col <- new(45)[as.numeric(cut(data$angle,breaks =
 45))]
 
 
-# change the name of the output file
+# change the name of the output file (keep the svg extension)
 svg("PaSiMap.svg")
 
 plot (y, z, bg= data$Col, pch = 21, cex = 1.3,
