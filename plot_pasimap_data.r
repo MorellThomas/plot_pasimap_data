@@ -3,7 +3,7 @@
 # datapoints will be colored by angle
 #
 #  go through the script and change annotated lines to your needs
-#  afterwards, run the whole script
+#  afterwards, run the whole script by pressing <Alt + Ctrl + r>
 ##
 
 require(REdaS) || install.packages("REdaS")
@@ -35,8 +35,7 @@ plot (y, z, bg= data$Col, pch = 21, cex = 1.3,
 xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
 ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 
-# comment the line below (by adding a '#' in front of it) to disable labels in the plot)
-text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), 
-offset = 100)
+# comment the line below (by adding a '#' in front of it) to disable labels in the plot
+text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 dev.off()
