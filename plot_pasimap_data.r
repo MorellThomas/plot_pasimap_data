@@ -5,6 +5,9 @@
 #
 #  go through the script and change annotated lines to your needs
 #  afterwards, run the whole script by pressing <Alt + Ctrl + r>
+#
+# if you want to look at a specific figure inside of this editor and not export the graph,
+# comment (place a '#' at the beginning) the lines with 'svg(...)' and 'dev.off()' of that figure
 ##
 
 require(REdaS) || install.packages("REdaS")
@@ -94,12 +97,21 @@ for (i in 1:nrow(angle_distribution))
 } 
 
 
+### (advanced) change the group of a datapoint manually
+##
+# syntax for this is the following:
+# data$group[datapoint number] <- new group
+# uncomment (remove the '#' in the beginning) the line below the '##' and enter your values to make it active
+# re-run the code until the next 'dev.off' to update your graph
+##
+# data$group[1] <- 5
+
 ### 
 # set the name of the output file (keep the svg extension)
 svg("PasiMap-by-angle-group.svg")
 
 cols_new <- new(45)[as.numeric(cut(data$group,breaks = 45))]
-plot (y, z, bg= cols, pch = 21, cex = 1.3,
+plot (y, z, bg= cols_new, pch = 21, cex = 1.3,
 xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
 ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 
