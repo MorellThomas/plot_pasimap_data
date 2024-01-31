@@ -4,29 +4,33 @@
 # it will output the plot into your project folder. By default the file will be called "PaSiMap.svg".
 #
 #  go through the script and change annotated lines to your needs
-#  afterwards, run the whole script by pressing <Alt + Ctrl + r>
+#  afterwards, run the whole script by pressing <Alt + Ctrl + r> or <Option + Command + r>
+#
+#  you can a single line of code by pressing <Ctrl + Enter> or <Command + Enter>
 #
 # if you want to look at a specific figure inside of this editor and not export the graph,
 # comment (place a '#' at the beginning) the lines with 'svg(...)' and 'dev.off()' of that figure
 ##
 
-require(REdaS) || install.packages("REdaS")
-require(plotly) || install.packages("plotly")
-require(ggplot2) || install.packages("ggplot2")
+require(REdaS) || install.packages("REdaS") && require(REdaS)
+require(plotly) || install.packages("plotly") && require(plotly)
+require(ggplot2) || install.packages("ggplot2") && require(ggplot2)
+require(Spectrum) || install.packages("Spectrum") && require(Spectrum)
 
 # enter the complete path to the main directory
-setwd("/home/thomas/Studium/Master_2/java-hiwi/plot/onGithub/")
+# (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
+setwd("/Users/thomasm/Desktop/master_main/R/plot_pasimap_data/")
 
 # change "example_data/" to the sub-directory containing the data 
 # (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
 data_dir <- "example_data/"
 
 # change "example_data.csv" to the name of your data file
-data <- read.csv(paste(data_dir, "example_data.csv", sep=""))
+data <- read.csv(paste(data_dir, "all.csv", sep=""))
 
-y <- data$coordinate_1
-z <- data$coordinate_2
-x <- data$coordinate_3
+y <- data$X1
+z <- data$X2
+x <- data$X3
 
 data$angle <- rad2deg(atan2(y,z))
 
@@ -45,7 +49,7 @@ xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05),
 ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
-text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
+#text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 dev.off()
 
@@ -109,6 +113,36 @@ for (i in 1:nrow(angle_distribution))
 ### 
 # set the name of the output file (keep the svg extension)
 svg("PasiMap-by-angle-group.svg")
+
+cols_new <- new(45)[as.numeric(cut(data$group,breaks = 45))]
+plot (y, z, bg= cols_new, pch = 21, cex = 1.3,
+xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
+ylim=rev(c(min(z)-0.05,max(z)+0.05)))
+
+# comment the line below (by adding a '#' in front of it) to disable labels in the plot
+text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
+
+dev.off()
+
+
+### group the data by Spectral Clustering
+# do not change anything here
+dataForSpectral <- data[,c(2:4)]
+dataForSpectral <- t(dataForSpectral)
+colnames(dataForSpectral) <- seq(1:ncol(dataForSpectral))
+spectral <- Spectrum(dataForSpectral,method=2,showpca=TRUE,fontsize=8,dotsize=2)
+groups <- spectral[["assignments"]]
+
+for (i in 1:length(groups))
+{
+  group <- groups[i]
+  data$group[i] = group
+}
+
+
+### plot the Spectral Clustering groups
+# set the name of the output file (keep the svg extension)
+svg("PasiMap-Spectral-Clustering.svg")
 
 cols_new <- new(45)[as.numeric(cut(data$group,breaks = 45))]
 plot (y, z, bg= cols_new, pch = 21, cex = 1.3,
