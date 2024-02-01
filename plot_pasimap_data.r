@@ -1,32 +1,35 @@
 ##
-# this script plots the PaSiMap coordinates exported from Jalview in a scatterplot
-# datapoints will be colored by angle.
-# it will output the plot into your project folder. By default the file will be called "PaSiMap.svg".
+# this script plots the PaSiMap coordinates 
+# exported from Jalview in different scatterplots
+# it will output the plots into your project folder. 
 #
-#  go through the script and change annotated lines to your needs
-#  afterwards, run the whole script by pressing <Alt + Ctrl + r> or <Option + Command + r>
+# go through the script and change annotated lines to your needs
+# afterwards, run the whole script 
+# by pressing <Alt + Ctrl + r> or <Option + Command + r>
 #
-#  you can a single line of code by pressing <Ctrl + Enter> or <Command + Enter>
+# you can a single line of code 
+# by pressing <Ctrl + Enter> or <Command + Enter>
 #
-# if you want to look at a specific figure inside of this editor and not export the graph,
-# comment (place a '#' at the beginning) the lines with 'svg(...)' and 'dev.off()' of that figure
+# if you want to look at a specific figure inside of
+# this editor and not export the graph,
+# comment (place a '#' at the beginning) the lines with
+# 'svg(...)' and 'dev.off()' of that figure
 ##
 
-require(REdaS) || install.packages("REdaS") && require(REdaS)
-require(plotly) || install.packages("plotly") && require(plotly)
-require(ggplot2) || install.packages("ggplot2") && require(ggplot2)
-require(Spectrum) || install.packages("Spectrum") && require(Spectrum)
+packages <- c("REdaS", "plotly", "ggplot2", "Spectrum")
+installed <- packages %in% rownames(installed.packages())
+if (any(installed == FALSE)) {
+  install.packages(packages[!installed])
+}
+
+lapply(packages, library, character.only=TRUE)
 
 # enter the complete path to the main directory
 # (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
-setwd("/Users/thomasm/Desktop/master_main/R/plot_pasimap_data/")
-
-# change "example_data/" to the sub-directory containing the data 
-# (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
-data_dir <- "example_data/"
+setwd("your-path-to/plot_pasimap_data-master/example_data/")
 
 # change "example_data.csv" to the name of your data file
-data <- read.csv(paste(data_dir, "all.csv", sep=""))
+data <- read.csv("example_data.csv")
 
 y <- data$X1
 z <- data$X2
@@ -130,7 +133,7 @@ dev.off()
 dataForSpectral <- data[,c(2:4)]
 dataForSpectral <- t(dataForSpectral)
 colnames(dataForSpectral) <- seq(1:ncol(dataForSpectral))
-spectral <- Spectrum(dataForSpectral,method=2,showpca=TRUE,fontsize=8,dotsize=2)
+spectral <- Spectrum(dataForSpectral,method=2,showres=FALSE,fontsize=8,dotsize=2)
 groups <- spectral[["assignments"]]
 
 for (i in 1:length(groups))
