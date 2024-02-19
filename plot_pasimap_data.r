@@ -7,7 +7,7 @@
 # afterwards, run the whole script 
 # by pressing <Alt + Ctrl + r> or <Option + Command + r>
 #
-# you can a single line of code 
+# you can run a single line of code 
 # by pressing <Ctrl + Enter> or <Command + Enter>
 #
 # if you want to look at a specific figure inside of
