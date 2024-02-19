@@ -13,7 +13,7 @@
 # if you want to look at a specific figure inside of
 # this editor and not export the graph,
 # comment (place a '#' at the beginning) the lines with
-# 'svg(...)' and 'dev.off()' of that figure
+# 'make_figure(...)' and 'dev.off()' of that figure
 ##
 
 packages <- c("REdaS", "plotly", "ggplot2", "Spectrum")
@@ -28,8 +28,15 @@ lapply(packages, library, character.only=TRUE)
 # (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
 setwd("your-path-to/plot_pasimap_data-master/example_data/")
 
+# set the output format of your images
+# chose either svg, png, pdf or none
+output <- "none"
+
 # change "example_data.csv" to the name of your data file
-data <- read.csv("example_data.csv")
+if (!exists("data"))
+{
+  data <- read.csv("example_data.csv")
+}
 
 y <- data$X1
 z <- data$X2
@@ -42,10 +49,29 @@ new <- colorRampPalette(c("red","purple","blue","green","yellow" ,"orange"))
 data$Col <- new(45)[as.numeric(cut(data$angle,breaks = 
 45))]
 
+######## 
+# This code is needed by the script
+# to enscure its functionality.
+# DO NOT change this
+make_figure<-function(f)
+{
+  if (output == "svg")
+    svg(paste(f, ".svg", sep=""))
+  else if (output == "png")
+    png(paste(f, ".png", sep=""))
+  else if (output == "pdf")
+    pdf(paste(f, ".pdf", sep=""))
+}
+close<-function()
+{
+  if (output != "none")
+    dev.off()
+}
+########
 
 ### scatterplot of the pasimap datapoints colored by angle
 # set the name of the output file (keep the svg extension)
-svg("PaSiMap.svg")
+make_figure("PaSiMap")
 
 plot (y, z, bg= data$Col, pch = 21, cex = 1.3,
 xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
@@ -54,7 +80,7 @@ ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
 #text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
-dev.off()
+close()
 
 ### calculate the angle distribution grouping (do not change anything here)
 angle_bins <- seq(from = -175, to = 175, by = 10) # each bin holds angels -5 +4 (e.g -179 to -170)
@@ -75,10 +101,10 @@ cols_like_old <- new(45)[as.numeric(cut(angle_distribution$angle_bins,breaks = 4
 
 ### bar plot of the angle distribution
 # set the name of the output file (keep the svg extension)
-svg("angle-distribution.svg")
+make_figure("angle-distribution")
 barplot (angle_distribution$angle_counts, 0.83, col= cols_like_old, pch = 21, xaxt="n", xlab = "angle", ylab = "count", main="angle distribution per 10° angle intervals")
 axis(1, at = seq(from = 0.6, to = 35.6, by = 1), labels = angle_bins)
-dev.off()
+close()
 
 ### group sequences by angle cluster (do not change anything here)
 group <- 1
@@ -115,7 +141,7 @@ for (i in 1:nrow(angle_distribution))
 
 ### 
 # set the name of the output file (keep the svg extension)
-svg("PasiMap-by-angle-group.svg")
+make_figure("PasiMap-by-angle-group")
 
 cols_new <- new(45)[as.numeric(cut(data$group,breaks = 45))]
 plot (y, z, bg= cols_new, pch = 21, cex = 1.3,
@@ -125,7 +151,7 @@ ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
 text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
-dev.off()
+close()
 
 
 ### group the data by Spectral Clustering
@@ -145,7 +171,7 @@ for (i in 1:length(groups))
 
 ### plot the Spectral Clustering groups
 # set the name of the output file (keep the svg extension)
-svg("PasiMap-Spectral-Clustering.svg")
+make_figure("PasiMap-Spectral-Clustering")
 
 cols_new <- new(45)[as.numeric(cut(data$group,breaks = 45))]
 plot (y, z, bg= cols_new, pch = 21, cex = 1.3,
@@ -155,4 +181,8 @@ ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
 text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
-dev.off()
+close()
+
+
+
+
