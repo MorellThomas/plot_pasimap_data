@@ -29,24 +29,24 @@ lapply(packages, library, character.only=TRUE)
 setwd("your-path-to/plot_pasimap_data-master/example_data/")
 
 # set the output format of your images
-# chose either svg, png, pdf or none
+# chose either svg, pdf or none
 output <- "none"
 
 # change "example_data.csv" to the name of your data file
-if (!exists("data"))
+if (!exists("datas"))
 {
-  data <- read.csv("example_data.csv")
+  datas <- read.csv("example_data.csv")
 }
 
-y <- data$X1
-z <- data$X2
-x <- data$X3
+y <- datas$X1
+z <- datas$X2
+x <- datas$X3
 
-data$angle <- rad2deg(atan2(y,z))
+datas$angle <- rad2deg(atan2(y,z))
 
 ### colors the datapoints by angle
 new <- colorRampPalette(c("red","purple","blue","green","yellow" ,"orange"))
-data$Col <- new(45)[as.numeric(cut(data$angle,breaks = 
+datas$Col <- new(45)[as.numeric(cut(datas$angle,breaks = 
 45))]
 
 ######## 
@@ -57,8 +57,6 @@ make_figure<-function(f)
 {
   if (output == "svg")
     svg(paste(f, ".svg", sep=""))
-  else if (output == "png")
-    png(paste(f, ".png", sep=""))
   else if (output == "pdf")
     pdf(paste(f, ".pdf", sep=""))
 }
@@ -73,12 +71,12 @@ close<-function()
 # set the name of the output file (keep the svg extension)
 make_figure("PaSiMap")
 
-plot (y, z, bg= data$Col, pch = 21, cex = 1.3,
+plot (y, z, bg= datas$Col, pch = 21, cex = 1.3,
 xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
 ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
-#text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
+#text(y, z, labels=datas$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 close()
 
@@ -86,15 +84,15 @@ close()
 angle_bins <- seq(from = -175, to = 175, by = 10) # each bin holds angels -5 +4 (e.g -179 to -170)
 angle_counts <- rep(0,36)
 angle_distribution <- data.frame(angle_bins, angle_counts)
-data[, "binned_angle"] <- 0
-for (i in 1:nrow(data))
+datas[, "binned_angle"] <- 0
+for (i in 1:nrow(datas))
 {
-  angle <- data[i,]["angle"]
+  angle <- datas[i,]["angle"]
   angle <- as.integer(angle)
   rounded <- round(angle, digits = -1)
   binned_angle <- if ((angle - rounded) < 0) rounded - 5 else rounded + 5
   row_index = which(angle_distribution$angle_bins == binned_angle)
-  data[i,]["binned_angle"] <- binned_angle
+  datas[i,]["binned_angle"] <- binned_angle
   angle_distribution$angle_counts[row_index] <- angle_distribution$angle_counts[row_index] + 1
 }
 cols_like_old <- new(45)[as.numeric(cut(angle_distribution$angle_bins,breaks = 45))]
@@ -108,7 +106,7 @@ close()
 
 ### group sequences by angle cluster (do not change anything here)
 group <- 1
-data[, "group"] <- 0
+datas[, "group"] <- 0
 old_n <- 0
 for (i in 1:nrow(angle_distribution))
 {
@@ -116,10 +114,10 @@ for (i in 1:nrow(angle_distribution))
   anglebin <- angle_distribution$angle_bins[i]
   if (n > 0)
   {
-    dataindexes = which(data$binned_angle == anglebin)
+    dataindexes = which(datas$binned_angle == anglebin)
     for (k in dataindexes)
     {
-      data$group[k] <- group
+      datas$group[k] <- group
     }
   } 
   else if (n == 0 && old_n != 0)
@@ -133,30 +131,30 @@ for (i in 1:nrow(angle_distribution))
 ### (advanced) change the group of a datapoint manually
 ##
 # syntax for this is the following:
-# data$group[datapoint number] <- new group
+# datas$group[datapoint number] <- new group
 # uncomment (remove the '#' in the beginning) the line below the '##' and enter your values to make it active
-# re-run the code until the next 'dev.off' to update your graph
+# re-run the code until the next 'close()' to update your graph
 ##
-# data$group[1] <- 5
+# datas$group[1] <- 5
 
 ### 
 # set the name of the output file (keep the svg extension)
 make_figure("PasiMap-by-angle-group")
 
-cols_new <- new(45)[as.numeric(cut(data$group,breaks = 45))]
+cols_new <- new(45)[as.numeric(cut(datas$group,breaks = 45))]
 plot (y, z, bg= cols_new, pch = 21, cex = 1.3,
 xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
 ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
-text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
+#text(y, z, labels=datas$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 close()
 
 
 ### group the data by Spectral Clustering
 # do not change anything here
-dataForSpectral <- data[,c(2:4)]
+dataForSpectral <- datas[,c(2:4)]
 dataForSpectral <- t(dataForSpectral)
 colnames(dataForSpectral) <- seq(1:ncol(dataForSpectral))
 spectral <- Spectrum(dataForSpectral,method=2,showres=FALSE,fontsize=8,dotsize=2)
@@ -165,7 +163,7 @@ groups <- spectral[["assignments"]]
 for (i in 1:length(groups))
 {
   group <- groups[i]
-  data$group[i] = group
+  datas$group[i] = group
 }
 
 
@@ -173,13 +171,13 @@ for (i in 1:length(groups))
 # set the name of the output file (keep the svg extension)
 make_figure("PasiMap-Spectral-Clustering")
 
-cols_new <- new(45)[as.numeric(cut(data$group,breaks = 45))]
+cols_new <- new(45)[as.numeric(cut(datas$group,breaks = 45))]
 plot (y, z, bg= cols_new, pch = 21, cex = 1.3,
 xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
 ylim=rev(c(min(z)-0.05,max(z)+0.05)))
 
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
-text(y, z, labels=data$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
+#text(y, z, labels=datas$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 close()
 
