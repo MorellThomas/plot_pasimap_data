@@ -26,25 +26,29 @@ lapply(packages, library, character.only=TRUE)
 
 # enter the complete path to the main directory
 # (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
-#setwd("your-path-to/plot_pasimap_data-master/example_data/")
-setwd("/Users/thomasm/Desktop/master_main/R/plot_pasimap_data/git/example_data/")
+setwd("your-path-to/plot_pasimap_data-master/example_data/")
 
 # change "example_data.csv" to the name of your data file
-if (!exists("coordinates"))
-{
-  coordinates <- read.csv("example_data.csv")
-}
+coordinates <- read.csv("example_data.csv")
 
 # set the output format of your images
 # chose either svg, pdf or none
 output <- "none"
 
 
-y <- coordinates$X1
-z <- coordinates$X2
-x <- coordinates$X3
+## dimensions to use
+# change X1, X2, ... to the dimension you want to use
+dim1 <- "X1"
+dim2 <- "X2"
+dim3 <- "X3"
 
-coordinates$angle <- rad2deg(atan2(y,z))
+
+#######
+x <- coordinates[[dim1]]
+y <- coordinates[[dim2]]
+z <- coordinates[[dim3]]
+
+coordinates$angle <- rad2deg(atan2(x,y))
 
 ### colors the datapoints by angle
 new <- colorRampPalette(c("red","purple","blue","green","yellow" ,"orange"))
@@ -67,34 +71,78 @@ close<-function()
   if (output != "none")
     dev.off()
 }
+show_interactive<-function(f)
+{
+    
+  interactive <- plot_ly(data = filter(coordinates, Sequence == "origin"), x = ~get(dim1), y = ~get(dim2), z = ~get(dim3),
+          name="origin", mode = 'markers', type="scatter3d",
+          marker = list( size = 4, color = "#000000", line = list(
+            color='rgba(0,0,0,1)', width=1)
+        ), hoverinfo='text', text=~Sequence)
+  if (f == "angle")
+  {
+    allCols <- lapply(coordinates, unique)$ColAngle
+    for (i in 1:(length(allCols)-1))
+  {
+      if (allCols[i] == "#000000")
+        next 
+      interactive <- interactive %>% 
+        add_trace(data = filter(coordinates, ColAngle == allCols[i]), x = ~get(dim1), y = ~get(dim2), z = ~get(dim3),
+                  name =paste(c("group", i), collapse=" "), mode = 'markers', type="scatter3d",
+                  marker = list( size = 4, color = ~ColAngle, line = list(
+                    color='rgba(0,0,0,1)', width=1)
+                ), hoverinfo='text', text=~Sequence)
+    }
+  } else if (f == "spectral") {
+    allCols <- lapply(coordinates, unique)$ColSpectral
+    for (i in 1:(length(allCols)-1))
+  {
+      if (allCols[i] == "#000000")
+        next 
+      interactive <- interactive %>% 
+        add_trace(data = filter(coordinates, ColSpectral == allCols[i]), x = ~get(dim1), y = ~get(dim2), z = ~get(dim3),
+                  name =paste(c("group", i), collapse=" "), mode = 'markers', type="scatter3d",
+                  marker = list( size = 4, color = ~ColSpectral, line = list(
+                    color='rgba(0,0,0,1)', width=1)
+                ), hoverinfo='text', text=~Sequence)
+    }
+  } else {
+    allCols <- lapply(coordinates, unique)$Col
+  }
+    
+  interactive <- interactive %>% 
+    layout(scene= list(yaxis = list(title = "coordinate 2", zeroline = FALSE,
+              showgrid = TRUE, showline=TRUE, mirror=TRUE, ticks="outside"),
+           xaxis = list(title = "coordinate 1", zeroline = FALSE,
+              showgrid = TRUE, showline=TRUE, mirror=TRUE, ticks="outside"),
+           zaxis = list(title = "coordinate 3", zeroline = FALSE,
+              showgrid = TRUE, showline=TRUE, mirror=TRUE, ticks="outside")), showlegend=TRUE)
+  
+  if (f == "angle")
+  {
+    htmlwidgets::saveWidget(as_widget(interactive), "PaSiMap_Angle.html")
+  } else if (f == "spectral") {
+    htmlwidgets::saveWidget(as_widget(interactive), "PaSiMap_Spectral.html")
+  } else {
+    htmlwidgets::saveWidget(as_widget(interactive), "PaSiMap.html")
+  }
+
+  return(interactive)
+}
 ########
 
 ### scatterplot of the pasimap datapoints colored by angle
 # set the name of the output file (keep the svg extension)
 make_figure("PaSiMap")
 
-plot (y, z, bg= coordinates$Col, pch = 21, cex = 1.3,
-xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
-ylim=rev(c(min(z)-0.05,max(z)+0.05)))
+plot (x, y, bg= coordinates$Col, pch = 21, cex = 1.3,
+xlab="coordinate 1", ylab="coordinate 2", xlim=c(min(x)-0.05,max(x)+0.05), 
+ylim=c(min(y)-0.05,max(y)+0.05))
 
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
 #text(y, z, labels=coordinates$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 close()
-
-# interactive visualisation of the data
-pasimap <- plot_ly(coordinates, x = ~X1, y = ~X2, type = 'scatter', mode = 'markers',
-               marker = list(
-                 size = 10, color = ~Col, line = list(color = 'rgba(0,0,0,1)', width=1)
-               ), hoverinfo = 'text', text = ~Sequence)
-pasimap <- pasimap %>%
-  layout(yaxis = list(title = "coordinate 3", zeroline = FALSE, range=rev(list(min(z)-0.05, max(z)+0.05)),
-             showgrid = FALSE, showline=TRUE, mirror=TRUE, ticks="outside"),
-         xaxis = list(title = "coordinate 2", zeroline = FALSE, range=list(min(y)-0.05, max(y)+0.05),
-             showgrid = FALSE, showline=TRUE, mirror=TRUE, ticks="outside"))
-# to show the plot
-pasimap
-##
 
 ### calculate the angle distribution grouping (do not change anything here)
 angle_bins <- seq(from = -175, to = 175, by = 10) # each bin holds angels -5 +4 (e.g -179 to -170)
@@ -151,35 +199,21 @@ for (i in 1:nrow(angle_distribution))
 # uncomment (remove the '#' in the beginning) the line below the '##' and enter your values to make it active
 # re-run the code until the next 'close()' to update your graph
 ##
-# coordinates$group[1] <- 5
+# coordinates$group[445] <- 9
 
 ### 
 # set the name of the output file (keep the svg extension)
 make_figure("PasiMap-by-angle-group")
 
 coordinates$ColAngle <- new(45)[as.numeric(cut(coordinates$group,breaks = 45))]
-plot (y, z, bg= coordinates$ColAngle, pch = 21, cex = 1.3,
-xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
-ylim=rev(c(min(z)-0.05,max(z)+0.05)))
+plot (x, y, bg= coordinates$ColAngle, pch = 21, cex = 1.3,
+xlab="coordinate 1", ylab="coordinate 2", xlim=c(min(x)-0.05,max(x)+0.05), 
+ylim=c(min(y)-0.05,max(y)+0.05))
 
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
 #text(y, z, labels=coordinates$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 close()
-
-# interactive visualisation of the data
-pasimap_by_angle <- plot_ly(coordinates, x = ~X1, y = ~X2, type = 'scatter', mode = 'markers',
-               marker = list(
-                 size = 10, color = ~ColAngle, line = list(color = 'rgba(0,0,0,1)', width=1)
-               ), hoverinfo = 'text', text = ~Sequence)
-pasimap_by_angle <- pasimap_by_angle %>%
-  layout(yaxis = list(title = "coordinate 3", zeroline = FALSE, range=rev(list(min(z)-0.05, max(z)+0.05)),
-                   showgrid = FALSE, showline=TRUE, mirror=TRUE, ticks="outside"),
-         xaxis = list(title = "coordinate 2", zeroline = FALSE, range=list(min(y)-0.05, max(y)+0.05),
-                   showgrid = FALSE, showline=TRUE, mirror=TRUE, ticks="outside"))
-# to show the plot
-pasimap_by_angle
-##
 
 ### group the data by Spectral Clustering
 # do not change anything here
@@ -201,27 +235,35 @@ for (i in 1:length(groups))
 make_figure("PasiMap-Spectral-Clustering")
 
 coordinates$ColSpectral <- new(45)[as.numeric(cut(coordinates$group,breaks = 45))]
-plot (y, z, bg= coordinates$ColSpectral, pch = 21, cex = 1.3,
-xlab="coordinate 2", ylab="coordinate 3", xlim=c(min(y)-0.05,max(y)+0.05), 
-ylim=rev(c(min(z)-0.05,max(z)+0.05)))
+plot (x, y, bg= coordinates$ColSpectral, pch = 21, cex = 1.3,
+xlab="coordinate 1", ylab="coordinate 2", xlim=c(min(x)-0.05,max(x)+0.05), 
+ylim=c(min(y)-0.05,max(y)+0.05))
 
 # comment the line below (by adding a '#' in front of it) to disable labels in the plot
 #text(y, z, labels=coordinates$Sequence, cex = 0.8, adj = c(1,1.7), offset = 100)
 
 close()
 
-# interactive visualisation of the data
-pasimap_spectral <- plot_ly(coordinates, x = ~X1, y = ~X2, type = 'scatter', mode = 'markers',
-               marker = list(
-                 size = 10, color = ~ColSpectral, line = list(color = 'rgba(0,0,0,1)', width=1)
-               ), hoverinfo = 'text', text = ~Sequence)
-pasimap_spectral <- pasimap_spectral %>%
-  layout(yaxis = list(title = "coordinate 3", zeroline = FALSE, range=rev(list(min(z)-0.05, max(z)+0.05)),
-            showgrid = FALSE, showline=TRUE, mirror=TRUE, ticks="outside"),
-         xaxis = list(title = "coordinate 2", zeroline = FALSE, range=list(min(y)-0.05, max(y)+0.05),
-            showgrid = FALSE, showline=TRUE, mirror=TRUE, ticks="outside"))
-# to show the plot
-pasimap_spectral
-##
 
+######
+# interactive 3d plot of the data
 
+#add the origin to the plot
+if (any(coordinates=="origin"))
+{
+  coordinates <- filter(coordinates, Sequence != "origin")
+}
+origin <- c("origin", 0, 0, 0, 0, 0, 0, 0, 0, 0, '#000000', 0, 0, '#000000', '#000000')
+coordinates <- rbind(coordinates, origin)
+coordinates[[dim1]] <- as.numeric(coordinates[[dim1]])
+coordinates[[dim2]] <- as.numeric(coordinates[[dim2]])
+coordinates[[dim3]] <- as.numeric(coordinates[[dim3]])
+coordinates$binned_angle <- as.numeric(coordinates$binned_angle)
+coordinates$angle <- as.numeric(coordinates$angle)
+coordinates$group <- as.numeric(coordinates$group)
+
+## shows the interactive 3D plot. Enter the colouring of your choice between the ""
+# you can choose between "spectral", "angle" and "default". If anything else is entered here
+# the default coloring is used.
+# the plot is saved as a html file.
+show_interactive("spectral")
