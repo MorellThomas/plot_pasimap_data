@@ -1,6 +1,7 @@
 # Plotting script for PaSiMap data
 
 This R script takes the coordinates from a PaSiMap analysis ([Su et al.](https://pubmed.ncbi.nlm.nih.gov/36212532/ "Pairwise sequence similarity mapping with PaSiMap: Reclassification of immunoglobulin domains from titin as case study")) as a csv file and creates interactive 2D and 3D scatterplots to visualise the data and aid in its analysis.
+[![DOI](https://zenodo.org/badge/704411927.svg)](https://zenodo.org/doi/10.5281/zenodo.12605086)
 
 ## Intended for use with Jalview
 
