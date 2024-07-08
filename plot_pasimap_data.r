@@ -37,7 +37,7 @@ output <- "none"
 
 # set the name of the jalview annotations file
 # comment or delete to disable annotation file creation
-jalview_annotations="example_data_clusters.jvannot"
+jalview_annotations="example_data_clusters.annotations"
 
 
 ## dimensions to use
