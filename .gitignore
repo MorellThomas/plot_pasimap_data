@@ -1,5 +1,6 @@
 .DS_Store
 *.pdf
+*.annotations
 *.svg
 *.html
 *.Rhistory

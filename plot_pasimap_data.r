@@ -26,28 +26,29 @@ lapply(packages, library, character.only=TRUE)
 
 # enter the complete path to the main directory
 # (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
-setwd("your-path-to/plot_pasimap_data-master/example_data/")
+data_path="your-path-to/plot_pasimap_data/example_data/"
 
 # change "example_data.csv" to the name of your data file
-coordinates <- read.csv("example_data.csv")
-
-# set the output format of your images
-# chose either svg, pdf or none
-output <- "none"
+coordinates_file="example_data.csv"
 
 # set the name of the jalview annotations file
 # comment or delete to disable annotation file creation
 jalview_annotations="example_data_clusters.annotations"
 
+# set the output format of your images
+# chose either svg, pdf or none
+output <- "none"
+
 
 ## dimensions to use
 # change X1, X2, ... to the dimension you want to use
-dim1 <- "X1"
-dim2 <- "X2"
-dim3 <- "X3"
+dim1 <- "X2"
+dim2 <- "X3"
+dim3 <- "X1"
 
 
 #######
+coordinates <- read.csv(paste(data_path, coordinates_file, sep=""))
 x <- coordinates[[dim1]]
 y <- coordinates[[dim2]]
 z <- coordinates[[dim3]]
@@ -66,9 +67,9 @@ coordinates$Col <- new(45)[as.numeric(cut(coordinates$angle,breaks =
 make_figure<-function(f)
 {
   if (output == "svg")
-    svg(paste(f, ".svg", sep=""))
+    svg(paste(data_path, f, ".svg", sep=""))
   else if (output == "pdf")
-    pdf(paste(f, ".pdf", sep=""))
+    pdf(paste(data_path, f, ".pdf", sep=""))
 }
 close<-function()
 {
@@ -253,7 +254,7 @@ close()
 # Sequences groups are defined on the alignment and assigned colours from the first
 # point's colour from the first in each coordinate subset
 if (exists("jalview_annotations")) {
-  cat(file=jalview_annotations,"JALVIEW_ANNOTATION\n")
+  cat(file=paste(data_path, jalview_annotations, spe=""),"JALVIEW_ANNOTATION\n")
   for(gid in names(table(spectral$assignments))) 
   {
     members <- c("SEQUENCE_GROUP", 
