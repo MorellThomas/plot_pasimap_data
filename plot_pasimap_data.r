@@ -48,6 +48,9 @@ dim3 <- "X1"
 
 
 #######
+if (!file.exists(paste(data_path, coordinates_file, sep="")))
+  stop(paste("File not found: ", paste(data_path, coordinates_file, sep="")))
+
 coordinates <- read.csv(paste(data_path, coordinates_file, sep=""))
 x <- coordinates[[dim1]]
 y <- coordinates[[dim2]]
