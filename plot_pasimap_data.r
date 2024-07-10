@@ -35,6 +35,10 @@ coordinates <- read.csv("example_data.csv")
 # chose either svg, pdf or none
 output <- "none"
 
+# set the name of the jalview annotations file
+# comment or delete to disable annotation file creation
+jalview_annotations="example_data_clusters.annotations"
+
 
 ## dimensions to use
 # change X1, X2, ... to the dimension you want to use
@@ -244,6 +248,26 @@ ylim=c(min(y)-0.05,max(y)+0.05))
 
 close()
 
+######
+# Write a jalview annotations file that can be loaded back onto the alignment
+# Sequences groups are defined on the alignment and assigned colours from the first
+# point's colour from the first in each coordinate subset
+if (exists("jalview_annotations")) {
+  cat(file=jalview_annotations,"JALVIEW_ANNOTATION\n")
+  for(gid in names(table(spectral$assignments))) 
+  {
+    members <- c("SEQUENCE_GROUP", 
+                 paste("group_",gid,sep=""),"*","*","-1",
+                 coordinates[spectral$assignments==gid,1])
+    cat(paste(as.list(members),"",sep="\t"),
+        "\n",
+        paste("PROPERTIES","\t","group_",gid, 
+              "\t","idColour=",
+              substr((coordinates$ColSpectral[spectral$assignments==gid][1]),2,7),
+              "\n",sep=""),file=jalview_annotations,append=TRUE,sep="") 
+  }
+  rm(members)
+}
 
 ######
 # interactive 3d plot of the data
