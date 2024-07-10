@@ -8,7 +8,7 @@ This R script takes the coordinates from a PaSiMap analysis ([Su et al.](https:/
 
 This script was originally created for the use together with the PaSiMap implementation in [Jalview](https://www.jalview.org).
 
-**It is part of a publication describing the usage of PaSiMap in Jalview and the subsequent analysis using this R script ([Morell et al.](https://www.cell.com/star-protocols/home "Not yet published"))**
+**It is part of a publication describing the usage of PaSiMap in Jalview and the subsequent analysis using this R script ([Morell et al.](https://www.cell.com/star-protocols/home "Not yet published")).**
 
 ## Example Data
 
