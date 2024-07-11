@@ -26,7 +26,8 @@ lapply(packages, library, character.only=TRUE)
 
 # enter the complete path to the main directory
 # (has to end with a '\' on windows or a '/' on Mac and GNU/Linux)
-data_path="your-path-to/plot_pasimap_data/example_data/"
+
+data_path="example_data/"
 
 # change "example_data.csv" to the name of your data file
 coordinates_file="example_data.csv"
