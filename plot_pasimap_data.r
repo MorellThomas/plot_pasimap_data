@@ -257,7 +257,8 @@ close()
 # Sequences groups are defined on the alignment and assigned colours from the first
 # point's colour from the first in each coordinate subset
 if (exists("jalview_annotations")) {
-  cat(file=paste(data_path, jalview_annotations, spe=""),"JALVIEW_ANNOTATION\n")
+  jv_file <- paste(data_path, jalview_annotations, sep="")
+  cat(file=jv_file,"JALVIEW_ANNOTATION\n")
   for(gid in names(table(spectral$assignments))) 
   {
     members <- c("SEQUENCE_GROUP", 
@@ -268,7 +269,7 @@ if (exists("jalview_annotations")) {
         paste("PROPERTIES","\t","group_",gid, 
               "\t","idColour=",
               substr((coordinates$ColSpectral[spectral$assignments==gid][1]),2,7),
-              "\n",sep=""),file=jalview_annotations,append=TRUE,sep="") 
+              "\n",sep=""),file=jv_file,append=TRUE,sep="")
   }
   rm(members)
 }
